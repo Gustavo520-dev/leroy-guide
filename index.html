@@ -1,0 +1,1070 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Leroy Guide — assistente de loja com IA, acessado por QR Code. MVP do Challenge Leroy Merlin / FIAP.">
+<meta name="theme-color" content="#151515">
+<title>Leroy Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;500;600;700&display=swap">
+
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+:root{
+  --bg-outer:#151515;
+  --bg:#212121;
+  --surface:#2C2C2C;
+  --surface-hi:#383838;
+  --green:#67AC45;
+  --green-soft:rgba(103,172,69,.12);
+  --green-dim:rgba(103,172,69,.28);
+  --orange:#F26C00;
+  --orange-soft:rgba(242,108,0,.12);
+  --orange-dim:rgba(242,108,0,.28);
+  --text:#EDEDE9;
+  --text-muted:#8A8A86;
+  --border:rgba(255,255,255,.07);
+  --shadow:0 40px 100px rgba(0,0,0,.7);
+}
+
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg-outer);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--text);
+  overflow:hidden;
+}
+
+/* ─── DEVICE FRAME ─── */
+.device-outer{
+  width:390px;
+  height:min(844px,95vh);
+  position:relative;
+  flex-shrink:0;
+}
+
+.device-frame{
+  width:100%;
+  height:100%;
+  background:#111;
+  border-radius:48px;
+  box-shadow:0 0 0 1.5px #3A3A3A, var(--shadow), inset 0 0 0 1px rgba(255,255,255,.04);
+  overflow:hidden;
+  position:relative;
+}
+
+.device-notch{
+  position:absolute;
+  top:10px;
+  left:50%;
+  transform:translateX(-50%);
+  width:115px;
+  height:33px;
+  background:#111;
+  border-radius:20px;
+  z-index:100;
+}
+
+.device-screen{
+  width:100%;
+  height:100%;
+  background:var(--bg);
+  border-radius:47px;
+  overflow:hidden;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+}
+
+/* ─── STATUS BAR ─── */
+.status-bar{
+  height:52px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  padding:0 26px 8px;
+  font-size:12px;
+  font-weight:600;
+  color:var(--text);
+  flex-shrink:0;
+}
+.status-icons{display:flex;gap:5px;align-items:center;}
+
+/* ─── VIEWS ─── */
+.view{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  transition:transform .38s cubic-bezier(.4,0,.2,1), opacity .38s ease;
+  overflow:hidden;
+}
+.view.hidden{
+  transform:translateX(100%);
+  opacity:0;
+  pointer-events:none;
+}
+
+/* ═══════════════════════════
+   START VIEW
+═══════════════════════════ */
+#view-start{background:var(--bg);}
+
+.start-content{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:28px 26px 32px;
+  overflow-y:auto;
+}
+
+.start-content::-webkit-scrollbar{width:0;}
+
+.qr-badge{
+  width:60px;
+  height:60px;
+  background:var(--green-soft);
+  border:1px solid var(--green-dim);
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:18px;
+  animation:badge-pop .5s cubic-bezier(.34,1.56,.64,1) .2s both;
+}
+
+@keyframes badge-pop{
+  from{opacity:0;transform:scale(.7);}
+  to{opacity:1;transform:scale(1);}
+}
+
+.scan-confirm{
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--green);
+  margin-bottom:10px;
+  animation:fade-up .4s ease .4s both;
+}
+
+.brand-name{
+  font-family:'DM Serif Display',Georgia,serif;
+  font-size:40px;
+  line-height:1.1;
+  color:var(--text);
+  text-align:center;
+  text-wrap:balance;
+  margin-bottom:8px;
+  animation:fade-up .4s ease .5s both;
+}
+
+.brand-sub{
+  font-size:13px;
+  color:var(--text-muted);
+  text-align:center;
+  margin-bottom:22px;
+  animation:fade-up .4s ease .55s both;
+}
+
+.store-tag{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:100px;
+  padding:7px 14px;
+  font-size:12px;
+  color:var(--text-muted);
+  margin-bottom:26px;
+  animation:fade-up .4s ease .6s both;
+}
+.store-tag strong{color:var(--text);font-weight:500;}
+
+@keyframes fade-up{
+  from{opacity:0;transform:translateY(8px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+.features-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  width:100%;
+  margin-bottom:26px;
+  animation:fade-up .4s ease .65s both;
+}
+
+.feature-item{
+  background:var(--surface);
+  border:1px solid var(--orange-dim);
+  border-radius:14px;
+  padding:13px;
+}
+
+.feature-icon{font-size:18px;margin-bottom:5px;display:block;}
+
+.feature-label{
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  color:var(--text-muted);
+  margin-bottom:2px;
+}
+
+.feature-desc{font-size:12px;color:var(--text);line-height:1.4;}
+
+.btn-start{
+  width:100%;
+  height:52px;
+  background:var(--green);
+  color:#fff;
+  border:none;
+  border-radius:14px;
+  font-size:15px;
+  font-weight:600;
+  cursor:pointer;
+  font-family:'Inter',sans-serif;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  transition:opacity .15s, transform .1s;
+  animation:fade-up .4s ease .7s both;
+}
+.btn-start:active{opacity:.88;transform:scale(.99);}
+
+/* ═══════════════════════════
+   CHAT VIEW
+═══════════════════════════ */
+#view-chat{background:var(--bg);}
+
+.chat-header{
+  padding:10px 18px 12px;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+  background:var(--bg);
+}
+
+.btn-back{
+  width:34px;height:34px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--surface);border:none;border-radius:10px;
+  cursor:pointer;color:var(--text);flex-shrink:0;
+  transition:background .15s;
+}
+.btn-back:active{background:var(--surface-hi);}
+
+.chat-header-info{flex:1;}
+
+.chat-title{
+  font-family:'DM Serif Display',Georgia,serif;
+  font-size:17px;color:var(--text);
+  line-height:1;margin-bottom:2px;
+}
+
+.chat-status{
+  display:flex;align-items:center;gap:5px;
+  font-size:11px;color:var(--text-muted);
+}
+
+.status-dot{
+  width:6px;height:6px;
+  background:var(--green);border-radius:50%;
+  animation:pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot{
+  0%,100%{opacity:1;}50%{opacity:.35;}
+}
+
+.chat-avatar-header{
+  width:36px;height:36px;
+  background:var(--green-soft);
+  border:1px solid var(--green-dim);
+  border-radius:11px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Serif Display',serif;
+  font-size:13px;color:var(--green);
+  letter-spacing:-.02em;flex-shrink:0;
+}
+
+/* MESSAGES */
+.messages-area{
+  flex:1;
+  overflow-y:auto;
+  padding:14px 15px 6px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  scroll-behavior:smooth;
+}
+.messages-area::-webkit-scrollbar{width:0;}
+
+.msg{
+  display:flex;flex-direction:column;
+  animation:msg-in .22s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes msg-in{
+  from{opacity:0;transform:translateY(10px) scale(.96);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
+.msg.bot{align-items:flex-start;}
+.msg.user{align-items:flex-end;}
+
+.msg-bubble{
+  max-width:80%;
+  padding:9px 13px;
+  border-radius:17px;
+  font-size:13.5px;
+  line-height:1.55;
+}
+
+.msg.bot .msg-bubble{
+  background:var(--surface);
+  color:var(--text);
+  border-bottom-left-radius:4px;
+}
+
+.msg.user .msg-bubble{
+  background:var(--green);
+  color:#fff;
+  border-bottom-right-radius:4px;
+}
+
+/* TYPING INDICATOR */
+.typing-indicator{
+  display:none;
+  align-items:center;
+  gap:4px;
+  padding:11px 14px;
+  background:var(--surface);
+  border-radius:17px;
+  border-bottom-left-radius:4px;
+  width:fit-content;
+  animation:msg-in .18s ease both;
+}
+.typing-indicator.show{display:flex;}
+.typing-dot{
+  width:6px;height:6px;
+  background:var(--text-muted);
+  border-radius:50%;
+  animation:typing-bounce 1.2s infinite ease-in-out;
+}
+.typing-dot:nth-child(1){animation-delay:0s;}
+.typing-dot:nth-child(2){animation-delay:.14s;}
+.typing-dot:nth-child(3){animation-delay:.28s;}
+
+@keyframes typing-bounce{
+  0%,60%,100%{transform:translateY(0);opacity:.35;}
+  30%{transform:translateY(-5px);opacity:1;}
+}
+
+/* ─── PRODUCT CARD ─── */
+.product-card{
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:13px;
+  padding:11px;
+  margin-top:6px;
+  display:flex;
+  gap:10px;
+  align-items:center;
+  max-width:255px;
+}
+
+.product-icon-box{
+  width:46px;height:46px;
+  background:var(--surface-hi);
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0;
+}
+
+.product-details{flex:1;min-width:0;}
+
+.product-name{
+  font-size:11.5px;font-weight:600;
+  color:var(--text);line-height:1.35;margin-bottom:3px;
+}
+
+.product-price{
+  font-size:14px;font-weight:700;
+  color:var(--green);margin-bottom:5px;
+  font-variant-numeric:tabular-nums;
+}
+
+.product-tags{display:flex;gap:4px;flex-wrap:wrap;}
+
+.tag{
+  font-size:10px;font-weight:600;
+  padding:2px 7px;border-radius:6px;
+  white-space:nowrap;
+}
+.tag.corridor{
+  background:var(--green-soft);
+  color:var(--green);
+  border:1px solid var(--green-dim);
+}
+.tag.stock{
+  background:rgba(103,172,69,.08);
+  color:var(--green);
+}
+
+/* ─── SHOPPING LIST ─── */
+.list-card{
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:13px;
+  overflow:hidden;
+  margin-top:6px;
+  max-width:275px;
+}
+.list-header{
+  background:var(--green-soft);
+  padding:9px 13px;
+  font-size:11.5px;font-weight:700;
+  letter-spacing:.04em;color:var(--green);
+  display:flex;align-items:center;gap:6px;
+  border-bottom:1px solid var(--green-dim);
+}
+.list-items{padding:2px 0;}
+.list-row{
+  padding:6px 13px;
+  display:flex;align-items:center;gap:7px;
+  border-bottom:1px solid var(--border);
+  font-size:11.5px;
+}
+.list-row:last-child{border-bottom:none;}
+.list-item-name{flex:1;color:var(--text);line-height:1.3;}
+.list-item-qty{color:var(--text-muted);white-space:nowrap;font-size:11px;}
+.list-item-corridor{
+  font-size:10px;font-weight:700;
+  background:var(--green-soft);color:var(--green);
+  padding:2px 6px;border-radius:5px;white-space:nowrap;
+}
+.list-footer{
+  padding:9px 13px;background:var(--surface);
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:12px;
+}
+.list-total-label{color:var(--text-muted);}
+.list-total-value{font-weight:700;color:var(--text);font-size:14px;font-variant-numeric:tabular-nums;}
+
+/* ─── TECH COMPARE ─── */
+.tech-card{
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:13px;
+  overflow:hidden;
+  margin-top:6px;
+  max-width:275px;
+}
+.tech-option{
+  padding:11px 13px;
+  border-bottom:1px solid var(--border);
+}
+.tech-option:last-child{border-bottom:none;}
+.tech-badge{
+  font-size:9.5px;font-weight:800;
+  padding:2px 7px;border-radius:5px;
+  white-space:nowrap;display:inline-block;margin-bottom:4px;
+  letter-spacing:.06em;text-transform:uppercase;
+}
+.tech-badge.basic{background:var(--surface-hi);color:var(--text-muted);}
+.tech-badge.pro{background:var(--green-soft);color:var(--green);}
+.tech-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px;}
+.tech-detail{font-size:11px;color:var(--text-muted);line-height:1.4;margin-bottom:4px;}
+.tech-price{font-size:13px;font-weight:700;color:var(--green);font-variant-numeric:tabular-nums;}
+.tech-loc{font-size:10px;font-weight:600;background:var(--green-soft);color:var(--green);padding:2px 6px;border-radius:5px;display:inline-block;margin-top:4px;}
+
+/* ─── TIP BOX ─── */
+.tip-box{
+  background:var(--orange-soft);
+  border:1px solid var(--orange-dim);
+  border-radius:10px;
+  padding:8px 11px;
+  font-size:12px;color:#F4A261;
+  margin-top:6px;max-width:270px;line-height:1.45;
+}
+
+/* ─── TABLE CARD ─── */
+.table-card{
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:13px;overflow:hidden;
+  margin-top:6px;max-width:270px;
+}
+.table-header{
+  background:var(--orange-soft);padding:9px 13px;
+  font-size:11.5px;font-weight:700;letter-spacing:.04em;color:var(--orange);
+  border-bottom:1px solid var(--orange-dim);
+}
+.table-row{
+  padding:6px 13px;display:flex;align-items:center;
+  border-bottom:1px solid var(--border);font-size:11.5px;gap:8px;
+}
+.table-row:last-child{border-bottom:none;}
+.table-row-name{flex:1;color:var(--text);line-height:1.3;}
+.table-row-val{
+  font-size:11px;font-weight:700;
+  background:rgba(242,108,0,.1);color:var(--orange);
+  padding:2px 7px;border-radius:5px;white-space:nowrap;
+}
+.table-footer{
+  padding:9px 13px;background:var(--surface);
+  display:flex;justify-content:space-between;
+  font-size:12px;
+}
+.table-footer-label{color:var(--text-muted);}
+.table-footer-val{font-weight:700;color:var(--text);}
+
+/* ─── QUICK REPLIES ─── */
+.quick-replies{
+  padding:6px 14px 4px;
+  display:flex;gap:7px;
+  overflow-x:auto;flex-wrap:nowrap;
+  flex-shrink:0;
+}
+.quick-replies::-webkit-scrollbar{height:0;}
+
+.chip{
+  flex-shrink:0;
+  padding:7px 13px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:100px;
+  font-size:12.5px;color:var(--text);
+  cursor:pointer;white-space:nowrap;
+  transition:background .13s, border-color .13s, transform .08s;
+  font-family:'Inter',sans-serif;
+  animation:chip-in .18s ease both;
+}
+@keyframes chip-in{
+  from{opacity:0;transform:translateY(5px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.chip:hover{border-color:var(--green-dim);}
+.chip:active{background:var(--surface-hi);transform:scale(.97);}
+
+/* ─── INPUT AREA ─── */
+.chat-input-area{
+  padding:7px 14px 22px;
+  display:flex;gap:9px;align-items:center;
+  border-top:1px solid var(--border);
+  background:var(--bg);flex-shrink:0;
+}
+
+.chat-input{
+  flex:1;height:42px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:0 13px;
+  font-size:13.5px;color:var(--text);
+  font-family:'Inter',sans-serif;outline:none;
+  transition:border-color .15s;
+}
+.chat-input::placeholder{color:var(--text-muted);}
+.chat-input:focus{border-color:var(--green-dim);}
+
+.btn-send{
+  width:42px;height:42px;
+  background:var(--green);border:none;
+  border-radius:12px;display:flex;
+  align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;
+  transition:opacity .15s, transform .08s;
+}
+.btn-send:active{opacity:.82;transform:scale(.95);}
+
+/* ─── DESKTOP DECORATIVE LABEL ─── */
+.device-label{
+  position:absolute;
+  bottom:-36px;left:50%;
+  transform:translateX(-50%);
+  font-size:11px;color:rgba(255,255,255,.25);
+  letter-spacing:.08em;text-transform:uppercase;
+  white-space:nowrap;
+  font-weight:500;
+}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:430px){
+  body{background:var(--bg);align-items:stretch;justify-content:stretch;}
+  .device-outer{width:100%;height:100dvh;}
+  .device-frame{border-radius:0;box-shadow:none;}
+  .device-screen{border-radius:0;}
+  .device-notch{display:none;}
+  .device-label{display:none;}
+  .status-bar{padding-top:6px;}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;}
+}
+</style>
+</head>
+<body>
+
+
+<div id="app" style="position:relative;">
+  <div class="device-outer">
+    <div class="device-frame">
+      <div class="device-notch"></div>
+      <div class="device-screen">
+
+        <!-- ═══ START VIEW ═══ -->
+        <div class="view" id="view-start">
+          <div class="status-bar">
+            <span style="font-variant-numeric:tabular-nums;">9:41</span>
+            <div class="status-icons">
+              <svg width="16" height="10" viewBox="0 0 16 10" fill="currentColor"><rect x="0" y="6" width="3" height="4" rx="0.5"/><rect x="4" y="4" width="3" height="6" rx="0.5"/><rect x="8" y="2" width="3" height="8" rx="0.5"/><rect x="12" y="0" width="3" height="10" rx="0.5"/></svg>
+              <svg width="15" height="11" viewBox="0 0 15 11" fill="currentColor"><path d="M7.5 3.5C9.2 3.5 10.8 4.1 12 5.1L13.4 3.7C11.8 2.3 9.7 1.5 7.5 1.5S3.2 2.3 1.6 3.7L3 5.1C4.2 4.1 5.8 3.5 7.5 3.5Z" opacity=".7"/><path d="M7.5 6C8.5 6 9.4 6.4 10.1 7L11.5 5.6C10.4 4.7 9 4.1 7.5 4.1S4.6 4.7 3.5 5.6L4.9 7C5.6 6.4 6.5 6 7.5 6Z"/><circle cx="7.5" cy="9" r="1.5"/></svg>
+              <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="21" height="11" rx="2.5" stroke="currentColor" opacity=".35"/><rect x="2" y="2" width="17" height="8" rx="1.5" fill="currentColor"/><path d="M23 4.5V7.5C23.8 7.2 24.5 6.5 24.5 6S23.8 4.8 23 4.5Z" fill="currentColor" opacity=".4"/></svg>
+            </div>
+          </div>
+
+          <div class="start-content">
+            <div class="qr-badge">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <rect x="2" y="2" width="12" height="12" rx="2" stroke="#67AC45" stroke-width="1.8"/>
+                <rect x="5" y="5" width="6" height="6" rx="1" fill="#67AC45"/>
+                <rect x="18" y="2" width="12" height="12" rx="2" stroke="#67AC45" stroke-width="1.8"/>
+                <rect x="21" y="5" width="6" height="6" rx="1" fill="#67AC45"/>
+                <rect x="2" y="18" width="12" height="12" rx="2" stroke="#67AC45" stroke-width="1.8"/>
+                <rect x="5" y="21" width="6" height="6" rx="1" fill="#67AC45"/>
+                <rect x="18" y="18" width="3" height="3" fill="#67AC45"/>
+                <rect x="23" y="18" width="3" height="3" fill="#67AC45"/>
+                <rect x="27" y="18" width="3" height="3" fill="#67AC45"/>
+                <rect x="18" y="23" width="3" height="3" fill="#67AC45"/>
+                <rect x="27" y="23" width="3" height="3" fill="#67AC45"/>
+                <rect x="23" y="27" width="7" height="3" fill="#67AC45"/>
+                <rect x="18" y="27" width="3" height="3" fill="#67AC45"/>
+              </svg>
+            </div>
+
+            <p class="scan-confirm">✓ QR Code escaneado</p>
+
+            <h1 class="brand-name">Leroy Guide</h1>
+            <p class="brand-sub">Assistente de Loja com Inteligência Artificial</p>
+
+            <div class="store-tag">
+              <svg width="12" height="13" viewBox="0 0 12 13" fill="none"><circle cx="6" cy="5.5" r="2" stroke="#8A8A86" stroke-width="1.5"/><path d="M6 1.5C3.8 1.5 2 3.3 2 5.5c0 2.5 4 6.5 4 6.5s4-4 4-6.5c0-2.2-1.8-4-4-4Z" stroke="#8A8A86" stroke-width="1.5" fill="none"/></svg>
+              <span><strong>Leroy Merlin</strong> · Av. Paulista, SP</span>
+            </div>
+
+            <div class="features-grid">
+              <div class="feature-item">
+                <span class="feature-icon">📍</span>
+                <div class="feature-label">Corredor Exato</div>
+                <div class="feature-desc">Localiza qualquer produto na loja</div>
+              </div>
+              <div class="feature-item">
+                <span class="feature-icon">🔧</span>
+                <div class="feature-label">IA Técnica</div>
+                <div class="feature-desc">Responde dúvidas na hora</div>
+              </div>
+              <div class="feature-item">
+                <span class="feature-icon">📋</span>
+                <div class="feature-label">Lista Personalizada</div>
+                <div class="feature-desc">Monta sua lista de compras</div>
+              </div>
+              <div class="feature-item">
+                <span class="feature-icon">⚡</span>
+                <div class="feature-label">Sem Fila</div>
+                <div class="feature-desc">Autoatendimento completo</div>
+              </div>
+            </div>
+
+            <button class="btn-start" id="btn-start">
+              Iniciar Assistente
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- ═══ CHAT VIEW ═══ -->
+        <div class="view hidden" id="view-chat">
+          <div class="status-bar">
+            <span style="font-variant-numeric:tabular-nums;">9:41</span>
+            <div class="status-icons">
+              <svg width="16" height="10" viewBox="0 0 16 10" fill="currentColor"><rect x="0" y="6" width="3" height="4" rx="0.5"/><rect x="4" y="4" width="3" height="6" rx="0.5"/><rect x="8" y="2" width="3" height="8" rx="0.5"/><rect x="12" y="0" width="3" height="10" rx="0.5"/></svg>
+              <svg width="15" height="11" viewBox="0 0 15 11" fill="currentColor"><path d="M7.5 3.5C9.2 3.5 10.8 4.1 12 5.1L13.4 3.7C11.8 2.3 9.7 1.5 7.5 1.5S3.2 2.3 1.6 3.7L3 5.1C4.2 4.1 5.8 3.5 7.5 3.5Z" opacity=".7"/><path d="M7.5 6C8.5 6 9.4 6.4 10.1 7L11.5 5.6C10.4 4.7 9 4.1 7.5 4.1S4.6 4.7 3.5 5.6L4.9 7C5.6 6.4 6.5 6 7.5 6Z"/><circle cx="7.5" cy="9" r="1.5"/></svg>
+              <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="21" height="11" rx="2.5" stroke="currentColor" opacity=".35"/><rect x="2" y="2" width="17" height="8" rx="1.5" fill="currentColor"/><path d="M23 4.5V7.5C23.8 7.2 24.5 6.5 24.5 6S23.8 4.8 23 4.5Z" fill="currentColor" opacity=".4"/></svg>
+            </div>
+          </div>
+
+          <div class="chat-header">
+            <button class="btn-back" id="btn-back">
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M9.5 3L5 7.5L9.5 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="chat-header-info">
+              <div class="chat-title">Leroy Guide</div>
+              <div class="chat-status">
+                <div class="status-dot"></div>
+                <span>Online agora</span>
+              </div>
+            </div>
+            <div class="chat-avatar-header">LG</div>
+          </div>
+
+          <div class="messages-area" id="messages-area">
+            <div class="typing-indicator" id="typing">
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+            </div>
+          </div>
+
+          <div id="quick-replies-container" class="quick-replies"></div>
+
+          <div class="chat-input-area">
+            <input class="chat-input" id="chat-input" type="text" placeholder="Digite sua pergunta...">
+            <button class="btn-send" id="btn-send">
+              <svg width="17" height="17" viewBox="0 0 17 17" fill="none"><path d="M2 8.5L15 1.5L8.5 15.5L7.5 9L2 8.5Z" fill="white"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /device-screen -->
+    </div><!-- /device-frame -->
+    <div class="device-label">Leroy Guide · MVP Demo · FIAP 2026</div>
+  </div><!-- /device-outer -->
+</div>
+
+<script>
+// ╔══════════════════════════════════════╗
+// ║   LEROY GUIDE — Chat Engine          ║
+// ╚══════════════════════════════════════╝
+
+const viewStart   = document.getElementById('view-start');
+const viewChat    = document.getElementById('view-chat');
+const btnStart    = document.getElementById('btn-start');
+const btnBack     = document.getElementById('btn-back');
+const msgArea     = document.getElementById('messages-area');
+const qrContainer = document.getElementById('quick-replies-container');
+const chatInput   = document.getElementById('chat-input');
+const btnSend     = document.getElementById('btn-send');
+
+// ── helpers ──────────────────────────────────────
+function scrollBottom(){ msgArea.scrollTop = msgArea.scrollHeight; }
+function getTyping(){ return document.getElementById('typing'); }
+function showTyping(){ const e=getTyping(); if(e){e.classList.add('show');scrollBottom();} }
+function hideTyping(){ const e=getTyping(); if(e) e.classList.remove('show'); }
+function clearChips(){ qrContainer.innerHTML=''; }
+
+function addMsg(role, text='', extraHTML=''){
+  const wrap = document.createElement('div');
+  wrap.className = 'msg '+role;
+  if(text){
+    const bub = document.createElement('div');
+    bub.className = 'msg-bubble';
+    bub.innerHTML = text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+    wrap.appendChild(bub);
+  }
+  if(extraHTML){
+    const ex = document.createElement('div');
+    ex.innerHTML = extraHTML;
+    wrap.appendChild(ex);
+  }
+  const t = getTyping();
+  t ? msgArea.insertBefore(wrap, t) : msgArea.appendChild(wrap);
+  scrollBottom();
+}
+
+function botSay(text, extra='', delay=1100){
+  return new Promise(res=>{
+    showTyping();
+    setTimeout(()=>{
+      hideTyping();
+      addMsg('bot', text, extra);
+      res();
+    }, delay);
+  });
+}
+
+function userSay(text){ clearChips(); addMsg('user', text); }
+
+function showChips(labels, callbacks){
+  clearChips();
+  labels.forEach((lbl,i)=>{
+    const btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.style.animationDelay = (i*55)+'ms';
+    btn.textContent = lbl;
+    btn.onclick = ()=>{
+      if(callbacks && callbacks[i]){
+        userSay(lbl);
+        clearChips();
+        callbacks[i]();
+      }
+    };
+    qrContainer.appendChild(btn);
+  });
+}
+
+// ── card builders ─────────────────────────────────
+function productCard({icon,name,price,c,s,stock=true}){
+  return `<div class="product-card">
+    <div class="product-icon-box">${icon}</div>
+    <div class="product-details">
+      <div class="product-name">${name}</div>
+      <div class="product-price">${price}</div>
+      <div class="product-tags">
+        <span class="tag corridor">📍 C${c} · P${s}</span>
+        ${stock?'<span class="tag stock">✓ Em estoque</span>':''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function listCard(items, total){
+  const rows = items.map(it=>`
+    <div class="list-row">
+      <span class="list-item-name">${it.n}</span>
+      <span class="list-item-qty">×${it.q}</span>
+      <span class="list-item-corridor">C${it.c}</span>
+    </div>`).join('');
+  return `<div class="list-card">
+    <div class="list-header">📋 Lista de Compras</div>
+    <div class="list-items">${rows}</div>
+    <div class="list-footer">
+      <span class="list-total-label">Total estimado</span>
+      <span class="list-total-value">${total}</span>
+    </div>
+  </div>`;
+}
+
+function techCard(opts){
+  const rows = opts.map(o=>`
+    <div class="tech-option">
+      <span class="tech-badge ${o.lv}">${o.badge}</span>
+      <div class="tech-name">${o.name}</div>
+      <div class="tech-detail">${o.detail}</div>
+      <div class="tech-price">${o.price}</div>
+      <span class="tech-loc">📍 Corredor ${o.c}</span>
+    </div>`).join('');
+  return `<div class="tech-card">${rows}</div>`;
+}
+
+function tableCard(title, rows, footerLabel, footerVal){
+  const rr = rows.map(r=>`
+    <div class="table-row">
+      <span class="table-row-name">${r.n}</span>
+      <span class="table-row-val">${r.v}</span>
+    </div>`).join('');
+  return `<div class="table-card">
+    <div class="table-header">${title}</div>
+    <div>${rr}</div>
+    <div class="table-footer">
+      <span class="table-footer-label">${footerLabel}</span>
+      <span class="table-footer-val">${footerVal}</span>
+    </div>
+  </div>`;
+}
+
+function tipBox(text){
+  return `<div class="tip-box">⚡ ${text}</div>`;
+}
+
+// ── navigation ────────────────────────────────────
+btnStart.addEventListener('click',()=>{
+  viewStart.classList.add('hidden');
+  viewChat.classList.remove('hidden');
+  setTimeout(startGreeting, 380);
+});
+
+btnBack.addEventListener('click',()=>{
+  viewChat.classList.add('hidden');
+  viewStart.classList.remove('hidden');
+  setTimeout(resetChat, 400);
+});
+
+function resetChat(){
+  msgArea.innerHTML = `<div class="typing-indicator" id="typing">
+    <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+  </div>`;
+  clearChips();
+  chatInput.value = '';
+}
+
+// ── GREETING ─────────────────────────────────────
+async function startGreeting(){
+  await botSay('Olá! 👋 Sou o **Leroy Guide**, assistente com IA aqui na loja.','', 950);
+  await botSay('Estou aqui para te ajudar a encontrar produtos, tirar dúvidas técnicas e montar sua lista. O que precisa?','', 1100);
+  showChips(
+    ['🔍 Buscar produto','🔨 Tenho um projeto','❓ Dúvida técnica'],
+    [flowFind, flowProject, flowTech]
+  );
+}
+
+async function mainMenu(){
+  await botSay('Posso te ajudar com mais alguma coisa?','', 800);
+  showChips(
+    ['🔍 Buscar produto','🔨 Tenho um projeto','❓ Dúvida técnica','🔄 Recomeçar'],
+    [flowFind, flowProject, flowTech, async()=>{resetChat();setTimeout(startGreeting,100);}]
+  );
+}
+
+// ── FLOW A: BUSCAR PRODUTO ────────────────────────
+async function flowFind(){
+  await botSay('Qual produto você está procurando?','', 750);
+  showChips(
+    ['Cimento CP-II 50kg','Tinta para parede','Furadeira de impacto','Piso laminado'],
+    [
+      ()=>foundProduct({icon:'🏗️',name:'Cimento Votorantim CP-II 50kg',price:'R$ 39,90',c:'14',s:'B'}),
+      ()=>foundProduct({icon:'🎨',name:'Tinta Suvinil Branco Gelo 3,6L',price:'R$ 89,90',c:'04',s:'A'}),
+      ()=>foundProduct({icon:'🔩',name:'Furadeira de Impacto Bosch GSB 550',price:'R$ 289,90',c:'09',s:'C'}),
+      ()=>foundProduct({icon:'🪵',name:'Piso Laminado Eucafloor 8mm (cx 2,4m²)',price:'R$ 59,90',c:'11',s:'A'}),
+    ]
+  );
+}
+
+async function foundProduct(p){
+  await botSay('Encontrei! 🎯',productCard(p), 1350);
+  await botSay('Quer adicionar à lista ou precisa de mais informações?','', 650);
+  showChips(
+    ['✅ Adicionar à lista','🔍 Buscar outro produto'],
+    [
+      async()=>{ await botSay('Adicionado à sua lista! ✅','', 700); await mainMenu(); },
+      flowFind
+    ]
+  );
+}
+
+// ── FLOW B: PROJETO ───────────────────────────────
+async function flowProject(){
+  await botSay('Ótimo! Me conta o seu projeto.','', 750);
+  showChips(
+    ['Pintar um quarto de 20m²','Reformar um banheiro','Instalar piso laminado'],
+    [flowPaint, flowBath, flowFloor]
+  );
+}
+
+async function flowPaint(){
+  await botSay('Calculei para um quarto de 20m² (2 demãos incluindo selador):','', 1900);
+  await botSay('Sua lista está pronta! 🎨', listCard([
+    {n:'Tinta Suvinil Branco Gelo 3,6L', q:2, c:'04'},
+    {n:'Selador Acrílico 18L',            q:1, c:'04'},
+    {n:'Rolo 23cm Lã de Carneiro',        q:2, c:'04'},
+    {n:'Bandeja Grande para Rolo',         q:1, c:'04'},
+    {n:'Lixa para Massa n° 150',           q:4, c:'05'},
+    {n:'Fita Crepe 48mm × 50m',           q:2, c:'05'},
+  ],'R$ 287,40'), 400);
+  await botSay('**Dica:** aplique o selador antes da tinta para melhor aderência e durabilidade.','', 1100);
+  await mainMenu();
+}
+
+async function flowBath(){
+  await botSay('Para um banheiro de até 6m², separei tudo o que você precisa:','', 2000);
+  await botSay('Lista completa pronta! 🚿', listCard([
+    {n:'Argamassa AC-III Cinza 20kg',      q:3, c:'14'},
+    {n:'Impermeabilizante Quartzolit 18L', q:1, c:'13'},
+    {n:'Azulejo Retificado 60×60 (m²)',    q:7, c:'12'},
+    {n:'Rejunte Branco 1kg',               q:2, c:'14'},
+    {n:'Espátula Dentada 8mm',             q:1, c:'14'},
+    {n:'Nível de Bolha 60cm',              q:1, c:'08'},
+  ],'R$ 634,70'), 400);
+  await mainMenu();
+}
+
+async function flowFloor(){
+  await botSay('Para 15m² de piso laminado (com 10% de margem para cortes):','', 2000);
+  await botSay('Lista para instalação! 🪵', listCard([
+    {n:'Piso Laminado Eucafloor 8mm (cx)',  q:7, c:'11'},
+    {n:'Manta Acústica 3mm (rolo 10m²)',    q:2, c:'11'},
+    {n:'Rodapé MDF 7cm (barra 2,4m)',       q:8, c:'11'},
+    {n:'Espaçador para Dilatação (pct)',    q:1, c:'11'},
+    {n:'Cola para Rodapé 400g',             q:2, c:'14'},
+  ],'R$ 892,50'), 400);
+  await mainMenu();
+}
+
+// ── FLOW C: DÚVIDA TÉCNICA ───────────────────────
+async function flowTech(){
+  await botSay('Qual é a sua dúvida? Pode ser sobre materiais, instalação ou especificações.','', 800);
+  showChips(
+    ['Furadeira para concreto','Tinta para banheiro','Bitola do fio elétrico'],
+    [flowDrill, flowPaintBath, flowWire]
+  );
+}
+
+async function flowDrill(){
+  await botSay('A escolha depende da intensidade de uso. Veja as opções disponíveis aqui na loja:','', 1600);
+  await botSay('', techCard([
+    {lv:'basic', badge:'USO LEVE',    name:'Bosch GSB 550 – Furadeira de Impacto', detail:'Ideal para buchas e rebites em paredes comuns. Uso doméstico.', price:'R$ 289,90', c:'09'},
+    {lv:'pro',   badge:'USO INTENSO', name:'Bosch GBH 2-28 – Martelete SDS-Plus',  detail:'Reforma pesada e ancoragem estrutural. Troca de modo: rotativo, impacto e cinzel.', price:'R$ 789,90', c:'09'},
+  ]), 400);
+  await botSay('Importante:',tipBox('Use sempre broca de metal duro (ponta cinza) para concreto. Bucha 6mm para cargas leves, 8mm para cargas pesadas.'), 1000);
+  await mainMenu();
+}
+
+async function flowPaintBath(){
+  await botSay('Para banheiro use tinta **semibrilho ou brilho** — resistem à umidade e são fáceis de limpar.','', 1400);
+  await botSay('', techCard([
+    {lv:'basic', badge:'CUSTO-BENEFÍCIO', name:'Coral Semibrilho Branco 3,6L',    detail:'Resistência à umidade, cobertura até 40m² por lata. Boa lavabilidade.', price:'R$ 79,90', c:'04'},
+    {lv:'pro',   badge:'PREMIUM',         name:'Suvinil Brilho Total Antimofo 3,6L', detail:'Alta lavabilidade, proteção antimofo, acabamento superior. Ideal para box.', price:'R$ 109,90', c:'04'},
+  ]), 400);
+  await mainMenu();
+}
+
+async function flowWire(){
+  await botSay('A bitola certa depende da carga do circuito. Tabela geral da NBR 5410:','', 1500);
+  await botSay('', tableCard(
+    '⚡ Bitola × Tipo de Circuito',
+    [
+      {n:'Iluminação e tomadas simples',      v:'1,5 mm²'},
+      {n:'Tomadas de uso geral (TUG)',         v:'2,5 mm²'},
+      {n:'Ar-condicionado / chuveiro elétrico',v:'4 mm²'},
+      {n:'Forno e chuveiro alta potência',     v:'6 mm²'},
+    ],
+    '📍 Fios disponíveis',
+    'Corredor 07'
+  ), 400);
+  await botSay('',tipBox('Sempre use cabo PP para circuitos externos expostos e conduíte flexível para instalações embutidas.'), 950);
+  await mainMenu();
+}
+
+// ── MANUAL INPUT ─────────────────────────────────
+async function handleInput(){
+  const raw = chatInput.value.trim();
+  if(!raw) return;
+  chatInput.value = '';
+  userSay(raw);
+  const t = raw.toLowerCase();
+
+  if(/cimento|argamassa|rejunte|concreto/.test(t))
+    await foundProduct({icon:'🏗️',name:'Cimento Votorantim CP-II 50kg',price:'R$ 39,90',c:'14',s:'B'});
+  else if(/tinta|pintar|cor|parede/.test(t) && !/banheiro/.test(t))
+    await flowPaint();
+  else if(/furadeira|martelete|broca|perfur/.test(t))
+    await flowDrill();
+  else if(/banheiro|azulejo|rejunte/.test(t))
+    await flowBath();
+  else if(/piso|laminado|parquet/.test(t))
+    await flowFloor();
+  else if(/fio|elétric|bitola|condutor/.test(t))
+    await flowWire();
+  else if(/tinta.*banheiro|banheiro.*tinta/.test(t))
+    await flowPaintBath();
+  else{
+    await botSay('Entendido! Para te ajudar melhor, escolha uma opção:','', 850);
+    await mainMenu();
+  }
+}
+
+chatInput.addEventListener('keydown', e=>{ if(e.key==='Enter') handleInput(); });
+btnSend.addEventListener('click', handleInput);
+</script>
+
+</body>
+</html>
